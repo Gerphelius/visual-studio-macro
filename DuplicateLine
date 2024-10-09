@@ -12,10 +12,10 @@ public class C : VisualCommanderExt.ICommand
 		TextSelection selection = (TextSelection)DTE.ActiveDocument.Selection;
 
 		TextDocument textDoc = (TextDocument)DTE.ActiveDocument.Object("TextDocument");
-    EditPoint point = textDoc.StartPoint.CreateEditPoint();
+    		EditPoint point = textDoc.StartPoint.CreateEditPoint();
 
 		if (selection != null)
-    {
+    		{
 			// Get start and end lines of the selection
 			int startPoint = selection.TopPoint.Line;
 			int endPoint = selection.BottomPoint.Line;
@@ -27,10 +27,10 @@ public class C : VisualCommanderExt.ICommand
 			string sourceLines = "";
 			
 			// Collect the selected lines
-      for (int i = startPoint; i <= endPoint; i++)
-      {
-        sourceLines += textDoc.CreateEditPoint(textDoc.StartPoint).GetLines(i, i + 1) + "\n";
-      }
+     			for (int i = startPoint; i <= endPoint; i++)
+      			{
+        			sourceLines += textDoc.CreateEditPoint(textDoc.StartPoint).GetLines(i, i + 1) + "\n";
+      			}
 
 			// Create an EditPoint at the end of the document where created string will be inserted
 			EditPoint insertPoint = textDoc.CreateEditPoint(textDoc.EndPoint);
@@ -38,13 +38,13 @@ public class C : VisualCommanderExt.ICommand
 			// Check if we are at the end of the document and append a new line if needed
 			if (textDoc.EndPoint.Line == endPoint)
 			{
-				insertPoint.Insert("\n"); // Add a new line if we're at the end
+				insertPoint.Insert("\n");	// Add a new line if we're at the end
 				resetSelection = true;
 			}
 
 			// Move to the next line and insert the copied block
 			insertPoint.MoveToLineAndOffset(endPoint + 1, 1);
-      insertPoint.Insert(sourceLines);
+      			insertPoint.Insert(sourceLines);
 
 			// Reset the selection to the original selection.
 			// If we try to duplicate strings and selection includes last character in document
@@ -52,8 +52,8 @@ public class C : VisualCommanderExt.ICommand
 			// selection will propagate to newly selected string and code that we've selected previously
 			if (resetSelection)
 			{
-			  selection.MoveToLineAndOffset(startPoint, 1);        // Move to the start of the original selection
-        selection.MoveToLineAndOffset(endPoint, endl, true); // Move to the end of the original selection
+			  	selection.MoveToLineAndOffset(startPoint, 1);           // Move to the start of the original selection
+        			selection.MoveToLineAndOffset(endPoint, endl, true);	// Move to the end of the original selection
 			}
 		}
 	}
