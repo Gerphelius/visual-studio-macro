@@ -1,0 +1,60 @@
+/*
+  This is the macro that mimics vscode default copy line(s) feature (shift+alt+down)
+*/
+using EnvDTE;
+using EnvDTE80;
+using VisualCommanderExt;
+
+public class C : VisualCommanderExt.ICommand
+{
+	public void Run(EnvDTE80.DTE2 DTE, Microsoft.VisualStudio.Shell.Package package) 
+	{
+		TextSelection selection = (TextSelection)DTE.ActiveDocument.Selection;
+
+		TextDocument textDoc = (TextDocument)DTE.ActiveDocument.Object("TextDocument");
+    EditPoint point = textDoc.StartPoint.CreateEditPoint();
+
+		if (selection != null)
+    {
+			// Get start and end lines of the selection
+			int startPoint = selection.TopPoint.Line;
+			int endPoint = selection.BottomPoint.Line;
+			
+			// Store current caret position
+			int endl = selection.ActivePoint.LineCharOffset;
+			bool resetSelection = false;
+
+			string sourceLines = "";
+			
+			// Collect the selected lines
+      for (int i = startPoint; i <= endPoint; i++)
+      {
+        sourceLines += textDoc.CreateEditPoint(textDoc.StartPoint).GetLines(i, i + 1) + "\n";
+      }
+
+			// Create an EditPoint at the end of the document where created string will be inserted
+			EditPoint insertPoint = textDoc.CreateEditPoint(textDoc.EndPoint);
+			
+			// Check if we are at the end of the document and append a new line if needed
+			if (textDoc.EndPoint.Line == endPoint)
+			{
+				insertPoint.Insert("\n"); // Add a new line if we're at the end
+				resetSelection = true;
+			}
+
+			// Move to the next line and insert the copied block
+			insertPoint.MoveToLineAndOffset(endPoint + 1, 1);
+      insertPoint.Insert(sourceLines);
+
+			// Reset the selection to the original selection.
+			// If we try to duplicate strings and selection includes last character in document
+			// (so after it no new lines or other characters) and not reseting selection
+			// selection will propagate to newly selected string and code that we've selected previously
+			if (resetSelection)
+			{
+			  selection.MoveToLineAndOffset(startPoint, 1);        // Move to the start of the original selection
+        selection.MoveToLineAndOffset(endPoint, endl, true); // Move to the end of the original selection
+			}
+		}
+	}
+}
